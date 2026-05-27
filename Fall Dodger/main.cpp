@@ -3,51 +3,10 @@
 #include <iostream>
 #include <vector>
 
+#include "Paddle.h"
+
 const int SCREEN_WIDTH = 1000;
 const int SCREEN_HEIGHT = 600;
-
-class Paddle {
-private:
-    int width = 150;
-    int height = 40;
-    float speed = 250.0f;
-    Vector2 padPosition;
-
-    KeyboardKey leftkey;
-    KeyboardKey rightkey;
-
-    Vector2 initialPosition;
-
-public:
-    Paddle(Vector2 position, KeyboardKey leftkey, KeyboardKey rightkey) {
-        padPosition = position;
-        this->leftkey = leftkey;
-        this->rightkey = rightkey;
-    }
-
-    Vector2 getPosition() { return padPosition; }
-    int getWidth() { return width; }
-    int getHeight() { return height; }
-
-    void draw() {
-        DrawRectangle(padPosition.x, padPosition.y, width, height, RAYWHITE);
-    }
-    void movement(float dt) {
-        if (IsKeyDown(leftkey)) padPosition.x -= speed * dt;
-        if (IsKeyDown(rightkey)) padPosition.x += speed * dt;
-    }
-    void increaseTimedDifficulty(float dt) {
-        speed += 10 * dt;
-    }
-    void collision() {
-        if (padPosition.x < 0.001) padPosition.x = 0;
-        if (padPosition.x > SCREEN_WIDTH - width -0.001) padPosition.x = SCREEN_WIDTH - width;
-    }
-    void reset() {
-        padPosition = initialPosition;
-        speed = 250.0f;
-    }
-};
 
 class Enemy {
 private:
@@ -63,6 +22,7 @@ public:
 
     Enemy(float x, float y) {
         position = { x,y };
+        prevSpeed = speed;
     }
 
     Vector2 getPosition() { return position; }
@@ -93,7 +53,6 @@ public:
             reset();
         }
     }
-
     void pause() {
         speed = 0.0f;
     }
@@ -133,7 +92,9 @@ public:
     void draw_score() {
         DrawText(TextFormat("%d", (int)score), 20, 30, 25, SKYBLUE);
     }
-
+    void reset() {
+        score = 0.0f;
+    }
 };
 
 Paddle pad(
@@ -169,6 +130,7 @@ int main() {
 
         if (currentState == TITLE) {
             if (IsKeyPressed(KEY_SPACE)) {
+                
                 currentState = PLAYING;
             }
         }
@@ -211,11 +173,14 @@ int main() {
         }
 
         if (currentState == GAMEOVER) {
+            if (IsKeyPressed(KEY_ENTER)) {
+                game.reset();
+                currentState = TITLE;
+            }
             pad.reset();
             for (Enemy& enemy : enemies) {
                 enemy.reset();
             }
-            if (IsKeyPressed(KEY_ENTER)) currentState = TITLE;
         }
         
         BeginDrawing();
@@ -232,7 +197,8 @@ int main() {
             game.draw_score();
 
             if (currentState == PAUSE) {
-                DrawText("PAUSED", 50, 30, 25, GREEN);
+                DrawRectangleLines(60, 25, 120, 30, GREEN);
+                DrawText("PAUSED", 70, 30, 25, GREEN);
                 DrawText("Enter [R] to Resume", 350, 250, 25, RAYWHITE);
             }
         }
