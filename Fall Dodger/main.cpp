@@ -8,59 +8,6 @@
 const int SCREEN_WIDTH = 1000;
 const int SCREEN_HEIGHT = 600;
 
-class Enemy {
-private:
-    int width = 40;
-    int height = 35;
-    float speed = 150.0f;
-
-    Vector2 position;
-
-    float prevSpeed;
-
-public:
-
-    Enemy(float x, float y) {
-        position = { x,y };
-        prevSpeed = speed;
-    }
-
-    Vector2 getPosition() { return position; }
-    int getWidth() { return width; }
-    int getHeight() { return height; }
-    float getSpeed() { return speed; }
-
-    void draw() {
-        DrawRectangle(position.x, position.y, width, height, RED);
-    }
-    void movement(float dt) {
-        position.y += speed * dt;
-    }
-    void increaseTimedDifficulty(float dt) {
-        if (speed < 400)
-        {
-            speed += 5 * dt;
-        }
-        prevSpeed = speed;
-    }
-    void reset(float yPos) {
-        position.x = GetRandomValue(0, SCREEN_WIDTH - width);
-        position.y = yPos;
-    }
-    void respawn()
-    {
-        if (position.y >= SCREEN_HEIGHT)
-        {
-            reset(GetRandomValue(-300, -100));
-        }
-    }
-    void pause() {
-        speed = 0.0f;
-    }
-    void resume() {
-        speed = prevSpeed;
-    }
-};
 
 class Game {
 private:
