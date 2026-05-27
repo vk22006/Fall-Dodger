@@ -34,6 +34,9 @@ public:
         if (IsKeyDown(leftkey)) padPosition.x -= speed * dt;
         if (IsKeyDown(rightkey)) padPosition.x += speed * dt;
     }
+    void increaseTimedDifficulty(float dt) {
+        speed += 10 * dt;
+    }
     void collision() {
         if (padPosition.x < 0.001) padPosition.x = 0;
         if (padPosition.x > SCREEN_WIDTH - width -0.001) padPosition.x = SCREEN_WIDTH - width;
@@ -57,12 +60,19 @@ public:
     Vector2 getPosition() { return position; }
     int getWidth() { return width; }
     int getHeight() { return height; }
+    float getSpeed() { return speed; }
 
     void draw() {
         DrawRectangle(position.x, position.y, width, height, RED);
     }
     void movement(float dt) {
         position.y += speed * dt;
+    }
+    void increaseTimedDifficulty(float dt) {
+        if (speed < 400)
+        {
+            speed += 5 * dt;
+        }
     }
     void reset() {
         position.x = GetRandomValue(0, SCREEN_WIDTH - width);
@@ -147,12 +157,14 @@ int main() {
         }
         if (currentState == PLAYING) {
             pad.movement(dt);
+            pad.increaseTimedDifficulty(dt);
             for (Enemy& enemy : enemies)
             {
                 enemy.movement(dt);
             }
             for (Enemy& enemy : enemies) {
                 enemy.respawn();
+                enemy.increaseTimedDifficulty(dt);
             }
 
             pad.collision();
@@ -165,6 +177,7 @@ int main() {
                 
             }
             game.scoring(dt);
+            
         }
         
         BeginDrawing();
