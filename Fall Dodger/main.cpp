@@ -1,6 +1,7 @@
 #include <raylib.h>
 #include <raymath.h>
 #include <iostream>
+#include <vector>
 
 const int SCREEN_WIDTH = 1000;
 const int SCREEN_HEIGHT = 600;
@@ -45,9 +46,14 @@ private:
     int height = 35;
     float speed = 150.0f;
 
-    Vector2 position = { static_cast<float>(GetRandomValue(0, SCREEN_WIDTH-width)), 20};
+    Vector2 position;
 
 public:
+
+    Enemy(float x, float y) {
+        position = { x,y };
+    }
+
     Vector2 getPosition() { return position; }
     int getWidth() { return width; }
     int getHeight() { return height; }
@@ -107,7 +113,7 @@ public:
 Paddle pad(
     { static_cast<float>((SCREEN_WIDTH / 2) - (150 / 2)), static_cast<float>(SCREEN_HEIGHT - 60) },
     KEY_A, KEY_D);
-Enemy enemy;
+std::vector<Enemy> enemies;
 Game game;
 
 enum GameState {
@@ -123,6 +129,13 @@ int main() {
 
     GameState currentState = TITLE;
 
+    //Loading enemies
+    for (int i = 0; i < 5; i++) {
+        enemies.push_back(
+            Enemy(GetRandomValue(0, SCREEN_WIDTH - 40), -100 * i)
+        );
+    }
+
     while (!WindowShouldClose()) {
 
         float dt = GetFrameTime();
@@ -134,12 +147,24 @@ int main() {
         }
         if (currentState == PLAYING) {
             pad.movement(dt);
-            enemy.movement(dt);
-            enemy.respawn();
+            for (Enemy& enemy : enemies)
+            {
+                enemy.movement(dt);
+            }
+            for (Enemy& enemy : enemies) {
+                enemy.respawn();
+            }
 
             pad.collision();
-            if (game.collision(pad, enemy) == true) currentState = GAMEOVER;
-            else game.scoring(dt);
+            for (Enemy& enemy : enemies)
+            {
+                if (game.collision(pad, enemy))
+                {
+                    currentState = GAMEOVER;
+                }
+                
+            }
+            game.scoring(dt);
         }
         
         BeginDrawing();
@@ -150,7 +175,9 @@ int main() {
         }
         else if (currentState == PLAYING) {
             pad.draw();
-            enemy.draw();
+            for (Enemy& enemy : enemies) {
+                enemy.draw();
+            }
             game.draw_score();
         }
         else if (currentState == GAMEOVER) {
