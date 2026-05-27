@@ -1,6 +1,9 @@
 #include <raylib.h>
 #include "Paddle.h"
 
+const int SCREEN_WIDTH = 1000;
+const int SCREEN_HEIGHT = 600;
+
 Paddle::Paddle(Vector2 position, KeyboardKey leftkey, KeyboardKey rightkey) {
     padPosition = position;
     initialPosition = position;

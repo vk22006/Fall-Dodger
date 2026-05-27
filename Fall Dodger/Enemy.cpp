@@ -1,6 +1,9 @@
 #include <raylib.h>
 #include "Enemy.h"
 
+const int SCREEN_WIDTH = 1000;
+const int SCREEN_HEIGHT = 600;
+
 Enemy::Enemy(float x, float y) {
     position = { x,y };
     prevSpeed = speed;
