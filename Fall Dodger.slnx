@@ -4,5 +4,5 @@
     <Platform Name="x64" />
     <Platform Name="x86" />
   </Configurations>
-  <Project Path="Fall Dodger/Fall Dodger.vcxproj" />
+  <Project Path="Fall Dodger/Fall Dodger.vcxproj" Id="318f5859-77f7-4d7d-8479-6a769251104d" />
 </Solution>
