@@ -43,14 +43,15 @@ public:
         }
         prevSpeed = speed;
     }
-    void reset() {
+    void reset(float yPos) {
         position.x = GetRandomValue(0, SCREEN_WIDTH - width);
-        position.y = 20;
+        position.y = yPos;
     }
-    void respawn() {
+    void respawn()
+    {
         if (position.y >= SCREEN_HEIGHT)
         {
-            reset();
+            reset(GetRandomValue(-300, -100));
         }
     }
     void pause() {
@@ -178,8 +179,9 @@ int main() {
                 currentState = TITLE;
             }
             pad.reset();
-            for (Enemy& enemy : enemies) {
-                enemy.reset();
+            for (int i = 0; i < enemies.size(); i++)
+            {
+                enemies[i].reset(-150 * i);
             }
         }
         
