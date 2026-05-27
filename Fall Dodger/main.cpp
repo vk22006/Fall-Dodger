@@ -4,46 +4,11 @@
 #include <vector>
 
 #include "Paddle.h"
+#include "Enemy.h"
+#include "Game.h"
 
 const int SCREEN_WIDTH = 1000;
 const int SCREEN_HEIGHT = 600;
-
-
-class Game {
-private:
-    float score = 0.0f;
-public:
-
-    int getScore() { return score; }
-
-    bool collision(Paddle& pad, Enemy& enemy)
-    {
-        Vector2 enemyPos = enemy.getPosition();
-        Vector2 padPos = pad.getPosition();
-
-        if (
-            enemyPos.x + enemy.getWidth() >= padPos.x &&
-            enemyPos.x <= padPos.x + pad.getWidth() &&
-
-            enemyPos.y + enemy.getHeight() >= padPos.y &&
-            enemyPos.y <= padPos.y + pad.getHeight()
-            )
-        {
-            return true;
-        }
-
-        return false;
-    }
-    void scoring(float dt) {
-        score += 10 * dt;
-    }
-    void draw_score() {
-        DrawText(TextFormat("%d", (int)score), 20, 30, 25, SKYBLUE);
-    }
-    void reset() {
-        score = 0.0f;
-    }
-};
 
 Paddle pad(
     { static_cast<float>((SCREEN_WIDTH / 2) - (150 / 2)), static_cast<float>(SCREEN_HEIGHT - 60) },
@@ -77,41 +42,26 @@ int main() {
         float dt = GetFrameTime();
 
         if (currentState == TITLE) {
-            if (IsKeyPressed(KEY_SPACE)) {
-                
-                currentState = PLAYING;
-            }
+            if (IsKeyPressed(KEY_SPACE)) currentState = PLAYING;
         }
         if (currentState == PLAYING) {
             pad.movement(dt);
             pad.increaseTimedDifficulty(dt);
-            for (Enemy& enemy : enemies)
-            {
-                enemy.movement(dt);
-            }
+            for (Enemy& enemy : enemies) enemy.movement(dt);
             for (Enemy& enemy : enemies) {
                 enemy.respawn();
                 enemy.increaseTimedDifficulty(dt);
             }
 
             pad.collision();
-            for (Enemy& enemy : enemies)
-            {
-                if (game.collision(pad, enemy))
-                {
-                    currentState = GAMEOVER;
-                }
-                
-            }
+            for (Enemy& enemy : enemies) if (game.collision(pad, enemy)) currentState = GAMEOVER;
             game.scoring(dt);
             
             if (IsKeyPressed(KEY_P)) currentState = PAUSE;
         }
 
         if (currentState == PAUSE) {
-            for (Enemy& enemy : enemies) {
-                enemy.pause();
-            }
+            for (Enemy& enemy : enemies) enemy.pause();
             if (IsKeyPressed(KEY_R)) {
                 for (Enemy& enemy : enemies) {
                     enemy.resume();
@@ -128,7 +78,7 @@ int main() {
             pad.reset();
             for (int i = 0; i < enemies.size(); i++)
             {
-                enemies[i].reset(-150 * i);
+                enemies[i].reset(-150 * i);  // Reset enemies' yPosition
             }
         }
         
@@ -140,9 +90,7 @@ int main() {
         }
         else if (currentState == PLAYING || currentState == PAUSE) {
             pad.draw();
-            for (Enemy& enemy : enemies) {
-                enemy.draw();
-            }
+            for (Enemy& enemy : enemies) enemy.draw();
             game.draw_score();
 
             if (currentState == PAUSE) {
