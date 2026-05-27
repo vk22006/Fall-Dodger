@@ -16,6 +16,8 @@ private:
     KeyboardKey leftkey;
     KeyboardKey rightkey;
 
+    Vector2 initialPosition;
+
 public:
     Paddle(Vector2 position, KeyboardKey leftkey, KeyboardKey rightkey) {
         padPosition = position;
@@ -41,6 +43,10 @@ public:
         if (padPosition.x < 0.001) padPosition.x = 0;
         if (padPosition.x > SCREEN_WIDTH - width -0.001) padPosition.x = SCREEN_WIDTH - width;
     }
+    void reset() {
+        padPosition = initialPosition;
+        speed = 250.0f;
+    }
 };
 
 class Enemy {
@@ -50,6 +56,8 @@ private:
     float speed = 150.0f;
 
     Vector2 position;
+
+    float prevSpeed;
 
 public:
 
@@ -73,6 +81,7 @@ public:
         {
             speed += 5 * dt;
         }
+        prevSpeed = speed;
     }
     void reset() {
         position.x = GetRandomValue(0, SCREEN_WIDTH - width);
@@ -83,6 +92,13 @@ public:
         {
             reset();
         }
+    }
+
+    void pause() {
+        speed = 0.0f;
+    }
+    void resume() {
+        speed = prevSpeed;
     }
 };
 
@@ -122,13 +138,14 @@ public:
 
 Paddle pad(
     { static_cast<float>((SCREEN_WIDTH / 2) - (150 / 2)), static_cast<float>(SCREEN_HEIGHT - 60) },
-    KEY_A, KEY_D);
+    KEY_LEFT, KEY_RIGHT);
 std::vector<Enemy> enemies;
 Game game;
 
 enum GameState {
     TITLE,
     PLAYING,
+    PAUSE,
     GAMEOVER
 };
 
@@ -178,6 +195,27 @@ int main() {
             }
             game.scoring(dt);
             
+            if (IsKeyPressed(KEY_P)) currentState = PAUSE;
+        }
+
+        if (currentState == PAUSE) {
+            for (Enemy& enemy : enemies) {
+                enemy.pause();
+            }
+            if (IsKeyPressed(KEY_R)) {
+                for (Enemy& enemy : enemies) {
+                    enemy.resume();
+                    currentState = PLAYING;
+                }
+            }
+        }
+
+        if (currentState == GAMEOVER) {
+            pad.reset();
+            for (Enemy& enemy : enemies) {
+                enemy.reset();
+            }
+            if (IsKeyPressed(KEY_ENTER)) currentState = TITLE;
         }
         
         BeginDrawing();
@@ -186,12 +224,17 @@ int main() {
             DrawText("FALL DODGER", 280, 200, 60, SKYBLUE);
             DrawText("Enter [SPACE] to Play", 350, 300, 25, RAYWHITE);
         }
-        else if (currentState == PLAYING) {
+        else if (currentState == PLAYING || currentState == PAUSE) {
             pad.draw();
             for (Enemy& enemy : enemies) {
                 enemy.draw();
             }
             game.draw_score();
+
+            if (currentState == PAUSE) {
+                DrawText("PAUSED", 50, 30, 25, GREEN);
+                DrawText("Enter [R] to Resume", 350, 250, 25, RAYWHITE);
+            }
         }
         else if (currentState == GAMEOVER) {
             DrawText("GAME OVER", 280, 200, 60, RED);
